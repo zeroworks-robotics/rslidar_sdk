@@ -201,32 +201,47 @@ if(rclcpp_FOUND)
     tf2_ros)
 
   #========================
-  # rslidar_ctrl_node
+  # rslidar_ctrl_node (lib/rs_ctrl_driver 에 파일이 있을 때만 빌드)
   #========================
-  set(CTRL_DRIVER_DIR "/root/etc_rslidar/linux-lib-namespace--2026/linux-lib-namespace/linux-build/example")
+  set(CTRL_DRIVER_DIR "${PROJECT_SOURCE_DIR}/lib/rs_ctrl_driver")
 
-  add_executable(rslidar_ctrl_node
-                 node/rslidar_ctrl_node.cpp)
+  if(EXISTS "${CTRL_DRIVER_DIR}/librs_ctrl_driver.a" AND
+     EXISTS "${CTRL_DRIVER_DIR}/lidar_ctrl_driver.hpp")
 
-  target_include_directories(rslidar_ctrl_node PRIVATE
-    ${CTRL_DRIVER_DIR})
+    message(=============================================================)
+    message("-- rs_ctrl_driver found. Building rslidar_ctrl_node.")
+    message(=============================================================)
 
-  # librs_ctrl_driver.a는 non-PIE boost와 함께 컴파일되어 -no-pie 필요
-  target_link_options(rslidar_ctrl_node PRIVATE -no-pie)
-  target_link_libraries(rslidar_ctrl_node
-    ${CTRL_DRIVER_DIR}/librs_ctrl_driver.a
-    ${CTRL_DRIVER_DIR}/libboost_system.a
-    ${YAML_CPP_LIBRARIES}
-    pthread)
+    add_executable(rslidar_ctrl_node
+                   node/rslidar_ctrl_node.cpp)
 
-  ament_target_dependencies(rslidar_ctrl_node
-    rclcpp
-    std_srvs
-    ament_index_cpp)
+    target_include_directories(rslidar_ctrl_node PRIVATE
+      ${CTRL_DRIVER_DIR})
+
+    # librs_ctrl_driver.a는 non-PIE boost와 함께 컴파일되어 -no-pie 필요
+    target_link_options(rslidar_ctrl_node PRIVATE -no-pie)
+    target_link_libraries(rslidar_ctrl_node
+      ${CTRL_DRIVER_DIR}/librs_ctrl_driver.a
+      ${CTRL_DRIVER_DIR}/libboost_system.a
+      ${YAML_CPP_LIBRARIES}
+      pthread)
+
+    ament_target_dependencies(rslidar_ctrl_node
+      rclcpp
+      std_srvs
+      ament_index_cpp)
+
+    install(TARGETS rslidar_ctrl_node
+      DESTINATION lib/${PROJECT_NAME})
+
+  else()
+    message(WARNING "rs_ctrl_driver not found in ${CTRL_DRIVER_DIR}. "
+                    "rslidar_ctrl_node will NOT be built. "
+                    "See lib/rs_ctrl_driver/README.md for setup instructions.")
+  endif()
 
   install(TARGETS
     rslidar_sdk_node
-    rslidar_ctrl_node
     DESTINATION lib/${PROJECT_NAME})
 
   install(DIRECTORY
