@@ -31,12 +31,15 @@ def launch_setup(context, *args, **kwargs):
     pkg_dir = get_package_share_directory('rslidar_sdk')
     default_config_path = os.path.join(pkg_dir, 'config', 'config.yaml')
 
-    lidar_frame_id = LaunchConfiguration('lidar_frame_id').perform(context)
-    imu_frame_id = LaunchConfiguration('imu_frame_id').perform(context)
+    lidar_frame_id   = LaunchConfiguration('lidar_frame_id').perform(context)
+    imu_frame_id     = LaunchConfiguration('imu_frame_id').perform(context)
+    device_address   = LaunchConfiguration('device_address').perform(context)
+    device_port      = LaunchConfiguration('device_port').perform(context)
 
     with open(default_config_path, 'r') as f:
         config = yaml.safe_load(f)
 
+    # lidar (data) 설정 반영
     for lidar in config.get('lidar', []):
         ros_cfg = lidar.get('ros', {})
         if lidar_frame_id:
@@ -45,26 +48,35 @@ def launch_setup(context, *args, **kwargs):
             ros_cfg['ros_imu_frame_id'] = imu_frame_id
         lidar['ros'] = ros_cfg
 
+    # ctrl 설정 반영
+    ctrl_cfg = config.get('ctrl', {})
+    if device_address:
+        ctrl_cfg['device_address'] = device_address
+    if device_port:
+        ctrl_cfg['device_port'] = int(device_port)
+    config['ctrl'] = ctrl_cfg
+
     tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False)
     yaml.dump(config, tmp)
     tmp.close()
-
-    rviz_config = os.path.join(pkg_dir, 'rviz', 'rviz2.rviz')
 
     return [
         Node(
             namespace='rslidar_sdk',
             package='rslidar_sdk',
             executable='rslidar_sdk_node',
+            name='rslidar_sdk_node',
             output='screen',
             parameters=[{'config_path': tmp.name}],
         ),
-        #Node(
-        #    namespace='rviz2',
-        #    package='rviz2',
-        #    executable='rviz2',
-        #    arguments=['-d', rviz_config],
-        #),
+        Node(
+            namespace='rslidar_sdk',
+            package='rslidar_sdk',
+            executable='rslidar_ctrl_node',
+            name='rslidar_ctrl_node',
+            output='screen',
+            parameters=[{'config_path': tmp.name}],
+        ),
     ]
 
 
@@ -79,12 +91,22 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'lidar_frame_id',
             default_value='rslidar',
-            description='Frame ID for the LiDAR (parent frame in /tf_static)',
+            description='LiDAR frame ID (point cloud header, parent frame of /tf_static)',
         ),
         DeclareLaunchArgument(
             'imu_frame_id',
             default_value='rslidar_imu',
-            description='Frame ID for the IMU (child frame in /tf_static)',
+            description='IMU frame ID (child frame of /tf_static)',
+        ),
+        DeclareLaunchArgument(
+            'device_address',
+            default_value='192.168.1.200',
+            description='LiDAR IP address (used for ctrl TCP connection)',
+        ),
+        DeclareLaunchArgument(
+            'device_port',
+            default_value='6699',
+            description='LiDAR control port',
         ),
         OpaqueFunction(function=launch_setup),
     ])

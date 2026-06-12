@@ -144,6 +144,8 @@ if(rclcpp_FOUND)
   find_package(std_msgs REQUIRED)
   find_package(geometry_msgs REQUIRED)
   find_package(tf2_ros REQUIRED)
+  find_package(std_srvs REQUIRED)
+  find_package(ament_index_cpp REQUIRED)
 
 else(rclcpp_FOUND)
   message(=============================================================)
@@ -198,8 +200,33 @@ if(rclcpp_FOUND)
     geometry_msgs
     tf2_ros)
 
+  #========================
+  # rslidar_ctrl_node
+  #========================
+  set(CTRL_DRIVER_DIR "/root/etc_rslidar/linux-lib-namespace--2026/linux-lib-namespace/linux-build/example")
+
+  add_executable(rslidar_ctrl_node
+                 node/rslidar_ctrl_node.cpp)
+
+  target_include_directories(rslidar_ctrl_node PRIVATE
+    ${CTRL_DRIVER_DIR})
+
+  # librs_ctrl_driver.a는 non-PIE boost와 함께 컴파일되어 -no-pie 필요
+  target_link_options(rslidar_ctrl_node PRIVATE -no-pie)
+  target_link_libraries(rslidar_ctrl_node
+    ${CTRL_DRIVER_DIR}/librs_ctrl_driver.a
+    ${CTRL_DRIVER_DIR}/libboost_system.a
+    ${YAML_CPP_LIBRARIES}
+    pthread)
+
+  ament_target_dependencies(rslidar_ctrl_node
+    rclcpp
+    std_srvs
+    ament_index_cpp)
+
   install(TARGETS
     rslidar_sdk_node
+    rslidar_ctrl_node
     DESTINATION lib/${PROJECT_NAME})
 
   install(DIRECTORY

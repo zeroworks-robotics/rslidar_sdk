@@ -19,6 +19,8 @@
   <depend>std_msgs</depend>
   <depend condition="$ROS_VERSION == 2">geometry_msgs</depend>
   <depend condition="$ROS_VERSION == 2">tf2_ros</depend>
+  <depend condition="$ROS_VERSION == 2">std_srvs</depend>
+  <depend condition="$ROS_VERSION == 2">ament_index_cpp</depend>
   <depend>yaml-cpp</depend>
 
   <export>

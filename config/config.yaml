@@ -1,3 +1,8 @@
+ctrl:
+  device_address: "192.168.1.200"   # LiDAR IP address (TCP control connection)
+  device_port: 6699                  # LiDAR control port
+  lidar_type: CRS_AIRY               # LiDAR type for ctrl driver
+
 common:
   msg_source: 1                         # 0: not use Lidar
                                         # 1: packet message comes from online Lidar
