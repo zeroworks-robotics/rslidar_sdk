@@ -267,6 +267,7 @@ inline void DestinationPointCloudRos::sendImuData(const std::shared_ptr<ImuData>
 #ifdef ENABLE_IMU_DATA_PARSE
   #include <sensor_msgs/msg/imu.hpp>
 #endif
+#include <std_msgs/msg/float32.hpp>
 #include <sstream>
 
 namespace robosense
@@ -435,11 +436,13 @@ public:
 #ifdef ENABLE_IMU_DATA_PARSE
   virtual void sendImuData(const std::shared_ptr<ImuData> & data);
 #endif
+  virtual void sendTemperature(float temp) override;
   virtual ~DestinationPointCloudRos() = default;
 
 private:
   std::shared_ptr<rclcpp::Node> node_ptr_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_;
+  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr temp_pub_;
 #ifdef ENABLE_IMU_DATA_PARSE
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub_;
 #endif
@@ -475,9 +478,11 @@ inline void DestinationPointCloudRos::init(const YAML::Node& config)
 
   pub_ = node_ptr_->create_publisher<sensor_msgs::msg::PointCloud2>(ros_send_topic, ros_queue_length);
 
+  temp_pub_ = node_ptr_->create_publisher<std_msgs::msg::Float32>("/rslidar_temperature", 10);
+
 #ifdef ENABLE_IMU_DATA_PARSE
   std::string ros_send_imu_data_topic;
-  yamlRead<std::string>(config["ros"], 
+  yamlRead<std::string>(config["ros"],
       "ros_send_imu_data_topic", ros_send_imu_data_topic, "rslidar_imu_data");
   imu_pub_ = node_ptr_->create_publisher<sensor_msgs::msg::Imu>(ros_send_imu_data_topic, 1000);
 #endif
@@ -488,6 +493,14 @@ inline void DestinationPointCloudRos::sendPointCloud(const LidarPointCloudMsg& m
 {
   pub_->publish(toRosMsg(msg, frame_id_, send_by_rows_));
 }
+
+inline void DestinationPointCloudRos::sendTemperature(float temp)
+{
+  std_msgs::msg::Float32 msg;
+  msg.data = temp;
+  temp_pub_->publish(msg);
+}
+
 #ifdef ENABLE_IMU_DATA_PARSE
 inline void DestinationPointCloudRos::sendImuData(const std::shared_ptr<ImuData> & data)
 {

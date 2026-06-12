@@ -74,6 +74,8 @@ protected:
   std::thread imu_data_process_thread_;
 #endif
   std::thread point_cloud_process_thread_;
+  std::thread temperature_poll_thread_;
+  void pollTemperature();
   bool to_exit_process_;
 };
 
@@ -152,11 +154,12 @@ inline void SourceDriver::init(const YAML::Node& config)
   driver_param.print();
 
   driver_ptr_.reset(new lidar::LidarDriver<LidarPointCloudMsg>());
-  driver_ptr_->regPointCloudCallback(std::bind(&SourceDriver::getPointCloud, this), 
+  driver_ptr_->regPointCloudCallback(std::bind(&SourceDriver::getPointCloud, this),
       std::bind(&SourceDriver::putPointCloud, this, std::placeholders::_1));
   driver_ptr_->regExceptionCallback(
       std::bind(&SourceDriver::putException, this, std::placeholders::_1));
   point_cloud_process_thread_ = std::thread(std::bind(&SourceDriver::processPointCloud, this));
+  temperature_poll_thread_ = std::thread(std::bind(&SourceDriver::pollTemperature, this));
 
 #ifdef ENABLE_IMU_DATA_PARSE
   driver_ptr_->regImuDataCallback(std::bind(&SourceDriver::getImuData, this),std::bind(&SourceDriver::putImuData, this, std::placeholders::_1));
@@ -186,6 +189,22 @@ inline void SourceDriver::stop()
 
   to_exit_process_ = true;
   point_cloud_process_thread_.join();
+#ifdef ENABLE_IMU_DATA_PARSE
+  imu_data_process_thread_.join();
+#endif
+  temperature_poll_thread_.join();
+}
+
+void SourceDriver::pollTemperature()
+{
+  while (!to_exit_process_)
+  {
+    for (int i = 0; i < 10 && !to_exit_process_; ++i)
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    float temp = 0.f;
+    if (!to_exit_process_ && driver_ptr_ && driver_ptr_->getTemperature(temp))
+      sendTemperature(temp);
+  }
 }
 
 inline std::shared_ptr<LidarPointCloudMsg> SourceDriver::getPointCloud(void)

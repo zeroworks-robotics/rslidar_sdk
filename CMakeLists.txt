@@ -45,7 +45,7 @@ if(${ENABLE_SOURCE_PACKET_LEGACY})
   add_definitions("-DENABLE_SOURCE_PACKET_LEGACY")
 endif(${ENABLE_SOURCE_PACKET_LEGACY})
 
-option(ENABLE_IMU_DATA_PARSE           "Enable imu data parse" OFF)
+option(ENABLE_IMU_DATA_PARSE           "Enable imu data parse" ON)
 if(${ENABLE_IMU_DATA_PARSE})
 
   message(=============================================================)
@@ -141,7 +141,7 @@ if(rclcpp_FOUND)
   find_package(ament_cmake REQUIRED)
   find_package(sensor_msgs REQUIRED)
   find_package(rslidar_msg REQUIRED)
-  find_package(std_msgs REQUIRED)                      
+  find_package(std_msgs REQUIRED)
 
 else(rclcpp_FOUND)
   message(=============================================================)
@@ -188,10 +188,10 @@ endif(roscpp_FOUND)
 #Ros2#
 if(rclcpp_FOUND)
 
-  ament_target_dependencies(rslidar_sdk_node 
-    rclcpp 
-    std_msgs 
-    sensor_msgs 
+  ament_target_dependencies(rslidar_sdk_node
+    rclcpp
+    std_msgs
+    sensor_msgs
     rslidar_msg)
 
   install(TARGETS
