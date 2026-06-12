@@ -12,3 +12,8 @@ cmake-build-debug/
 version.h
 *.pb.cc
 *.pb.h
+**/install
+**/build
+**/log
+tcpCom.txt
+**/.claude
