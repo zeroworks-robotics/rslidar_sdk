@@ -37,6 +37,7 @@ lidar:
 
     ros:
       ros_frame_id: rslidar                           #Frame id of packet message and point cloud message
+      ros_imu_frame_id: rslidar_imu                   #Frame id of IMU (child frame in /tf_static)
       ros_recv_packet_topic: /rslidar_packets          #Topic used to receive lidar packets from ROS
       ros_send_packet_topic: /rslidar_packets          #Topic used to send lidar packets through ROS
       ros_send_imu_data_topic: /rslidar_imu_data         #Topic used to send imu data through ROS

@@ -75,7 +75,9 @@ protected:
 #endif
   std::thread point_cloud_process_thread_;
   std::thread temperature_poll_thread_;
+  std::thread device_info_poll_thread_;
   void pollTemperature();
+  void pollDeviceInfo();
   bool to_exit_process_;
 };
 
@@ -160,6 +162,7 @@ inline void SourceDriver::init(const YAML::Node& config)
       std::bind(&SourceDriver::putException, this, std::placeholders::_1));
   point_cloud_process_thread_ = std::thread(std::bind(&SourceDriver::processPointCloud, this));
   temperature_poll_thread_ = std::thread(std::bind(&SourceDriver::pollTemperature, this));
+  device_info_poll_thread_ = std::thread(std::bind(&SourceDriver::pollDeviceInfo, this));
 
 #ifdef ENABLE_IMU_DATA_PARSE
   driver_ptr_->regImuDataCallback(std::bind(&SourceDriver::getImuData, this),std::bind(&SourceDriver::putImuData, this, std::placeholders::_1));
@@ -193,6 +196,7 @@ inline void SourceDriver::stop()
   imu_data_process_thread_.join();
 #endif
   temperature_poll_thread_.join();
+  device_info_poll_thread_.join();
 }
 
 void SourceDriver::pollTemperature()
@@ -204,6 +208,20 @@ void SourceDriver::pollTemperature()
     float temp = 0.f;
     if (!to_exit_process_ && driver_ptr_ && driver_ptr_->getTemperature(temp))
       sendTemperature(temp);
+  }
+}
+
+void SourceDriver::pollDeviceInfo()
+{
+  while (!to_exit_process_)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    DeviceInfo info;
+    if (driver_ptr_ && driver_ptr_->getDeviceInfo(info))
+    {
+      sendDeviceInfo(info);
+      return;
+    }
   }
 }
 

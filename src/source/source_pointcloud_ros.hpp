@@ -268,6 +268,8 @@ inline void DestinationPointCloudRos::sendImuData(const std::shared_ptr<ImuData>
   #include <sensor_msgs/msg/imu.hpp>
 #endif
 #include <std_msgs/msg/float32.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <tf2_ros/static_transform_broadcaster.h>
 #include <sstream>
 
 namespace robosense
@@ -437,6 +439,7 @@ public:
   virtual void sendImuData(const std::shared_ptr<ImuData> & data);
 #endif
   virtual void sendTemperature(float temp) override;
+  virtual void sendDeviceInfo(const DeviceInfo& info) override;
   virtual ~DestinationPointCloudRos() = default;
 
 private:
@@ -446,7 +449,9 @@ private:
 #ifdef ENABLE_IMU_DATA_PARSE
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub_;
 #endif
+  std::shared_ptr<tf2_ros::StaticTransformBroadcaster> tf_static_broadcaster_;
   std::string frame_id_;
+  std::string imu_frame_id_;
   bool send_by_rows_;
 };
 
@@ -460,11 +465,14 @@ inline void DestinationPointCloudRos::init(const YAML::Node& config)
   if (dense_points)
     send_by_rows_ = false;
 
-  yamlRead<std::string>(config["ros"], 
+  yamlRead<std::string>(config["ros"],
       "ros_frame_id", frame_id_, "rslidar");
 
+  yamlRead<std::string>(config["ros"],
+      "ros_imu_frame_id", imu_frame_id_, "rslidar_imu");
+
   std::string ros_send_topic;
-  yamlRead<std::string>(config["ros"], 
+  yamlRead<std::string>(config["ros"],
       "ros_send_point_cloud_topic", ros_send_topic, "rslidar_points");
 
   size_t ros_queue_length;
@@ -479,6 +487,8 @@ inline void DestinationPointCloudRos::init(const YAML::Node& config)
   pub_ = node_ptr_->create_publisher<sensor_msgs::msg::PointCloud2>(ros_send_topic, ros_queue_length);
 
   temp_pub_ = node_ptr_->create_publisher<std_msgs::msg::Float32>("/rslidar_temperature", 10);
+
+  tf_static_broadcaster_ = std::make_shared<tf2_ros::StaticTransformBroadcaster>(node_ptr_);
 
 #ifdef ENABLE_IMU_DATA_PARSE
   std::string ros_send_imu_data_topic;
@@ -507,6 +517,22 @@ inline void DestinationPointCloudRos::sendImuData(const std::shared_ptr<ImuData>
   imu_pub_->publish(toRosMsg(data, frame_id_));
 }
 #endif
+
+inline void DestinationPointCloudRos::sendDeviceInfo(const DeviceInfo& info)
+{
+  geometry_msgs::msg::TransformStamped t;
+  t.header.stamp = node_ptr_->get_clock()->now();
+  t.header.frame_id = frame_id_;
+  t.child_frame_id = imu_frame_id_;
+  t.transform.translation.x = info.x;
+  t.transform.translation.y = info.y;
+  t.transform.translation.z = info.z;
+  t.transform.rotation.x = info.qx;
+  t.transform.rotation.y = info.qy;
+  t.transform.rotation.z = info.qz;
+  t.transform.rotation.w = info.qw;
+  tf_static_broadcaster_->sendTransform(t);
+}
 }  // namespace lidar
 }  // namespace robosense
 

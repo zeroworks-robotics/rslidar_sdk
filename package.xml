@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>rslidar_sdk</name>
-  <version>1.5.20</version>
+  <version>1.5.21</version>
   <description>The rslidar_sdk package</description>
   <maintainer email="yhjin1096@zeroworks.co.kr">ZEROWORKS</maintainer>
   <license>BSD</license>
@@ -17,6 +17,8 @@
   <depend condition="$ROS_VERSION == 2">rslidar_msg</depend>
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
+  <depend condition="$ROS_VERSION == 2">geometry_msgs</depend>
+  <depend condition="$ROS_VERSION == 2">tf2_ros</depend>
   <depend>yaml-cpp</depend>
 
   <export>
