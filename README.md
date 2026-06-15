@@ -12,9 +12,9 @@ RoboSense RS-LiDAR-AIRY 전용 ROS2 워크스페이스입니다.
 
 ```
 src/
-├── rslidar_sdk/          # LiDAR SDK 패키지 (submodule: 이 저장소)
+├── rslidar_sdk/          # LiDAR SDK 패키지
 │   └── src/rs_driver/   # 드라이버 코어 (submodule: zeroworks-robotics/rs_driver)
-└── rslidar_msg/          # 메시지 정의 패키지 (submodule: ZEROWORKS-Hyeokjin/rslidar_msg)
+└── rslidar_msg/          # 메시지 정의 패키지 (submodule: zeroworks-robotics/rslidar_msg)
 ```
 
 ---
