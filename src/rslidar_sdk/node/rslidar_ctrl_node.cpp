@@ -47,9 +47,28 @@ public:
                 device_address_.c_str(), device_port_);
     RCLCPP_INFO(get_logger(), "  /rslidar/reboot     (std_srvs/Trigger)  -- 완전 재부팅");
     RCLCPP_INFO(get_logger(), "  /rslidar/set_power  (std_srvs/SetBool)  -- true=ON / false=OFF");
+
+    powerOnAtStartup();
   }
 
 private:
+  void powerOnAtStartup()
+  {
+    LidarCtrlDriver ctrl;
+    if (!connectCtrl(ctrl))
+    {
+      RCLCPP_WARN(get_logger(), "Startup power-on: failed to connect to LiDAR (%s). Will retry via service call.",
+                  device_address_.c_str());
+      return;
+    }
+    bool ok = ctrl.setMode(1);
+    ctrl.uninit();
+    if (ok)
+      RCLCPP_INFO(get_logger(), "Startup power-on: LiDAR powered ON.");
+    else
+      RCLCPP_WARN(get_logger(), "Startup power-on: setMode(1) failed. Use /rslidar/set_power to retry.");
+  }
+
   bool connectCtrl(LidarCtrlDriver& ctrl)
   {
     RSCtrlDriverParam param;
