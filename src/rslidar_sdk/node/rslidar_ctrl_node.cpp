@@ -147,6 +147,10 @@ int main(int argc, char** argv)
 
   RCLCPP_INFO(param_nd->get_logger(), "ctrl config: %s", config_path.c_str());
 
+  // config_path만 읽는 임시 노드. 파괴하지 않으면 __node remap 때문에
+  // 실제 ctrl 노드와 같은 이름으로 그래프에 중복 등록된다.
+  param_nd.reset();
+
   auto node = std::make_shared<RslidarCtrlNode>(config_path);
   rclcpp::spin(node);
   rclcpp::shutdown();

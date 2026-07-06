@@ -35,6 +35,7 @@ def launch_setup(context, *args, **kwargs):
     imu_frame_id     = LaunchConfiguration('imu_frame_id').perform(context)
     device_address   = LaunchConfiguration('device_address').perform(context)
     device_port      = LaunchConfiguration('device_port').perform(context)
+    use_lidar_clock  = LaunchConfiguration('use_lidar_clock').perform(context)
 
     with open(default_config_path, 'r') as f:
         config = yaml.safe_load(f)
@@ -47,6 +48,13 @@ def launch_setup(context, *args, **kwargs):
         if imu_frame_id:
             ros_cfg['ros_imu_frame_id'] = imu_frame_id
         lidar['ros'] = ros_cfg
+
+        # use_lidar_clock 오버라이드: 빈 문자열이면 config.yaml 값을 그대로 사용,
+        # 값이 주어지면(true/false) 그 값으로 덮어씀
+        if use_lidar_clock.strip():
+            driver_cfg = lidar.get('driver', {})
+            driver_cfg['use_lidar_clock'] = use_lidar_clock.strip().lower() in ('true', '1', 'yes', 'on')
+            lidar['driver'] = driver_cfg
 
     # ctrl 설정 반영
     ctrl_cfg = config.get('ctrl', {})
@@ -107,6 +115,12 @@ def generate_launch_description():
             'device_port',
             default_value='6699',
             description='LiDAR control port',
+        ),
+        DeclareLaunchArgument(
+            'use_lidar_clock',
+            default_value='',
+            description="타임스탬프 시계 선택. ''=config.yaml 값 유지, "
+                        "'true'=라이다 내부 시계, 'false'=PC 시스템 시계",
         ),
         OpaqueFunction(function=launch_setup),
     ])

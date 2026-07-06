@@ -104,6 +104,12 @@ int main(int argc, char** argv)
   }
 #endif
 
+#ifdef ROS2_FOUND
+  // config_path만 읽는 임시 노드. 파괴하지 않으면 __node remap 때문에
+  // 실제 드라이버 노드와 같은 이름으로 그래프에 중복 등록된다.
+  nd.reset();
+#endif
+
   YAML::Node config;
   try
   {
