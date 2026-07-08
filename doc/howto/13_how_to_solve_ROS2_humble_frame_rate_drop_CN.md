@@ -4,12 +4,12 @@
 
 该方法将DDS安装与环境变量配置植入到了rslidar_sdk的启动节点，并且仅在节点运行时生效，不影响全局环境，对安装了多种ros版本的环境较为友好，同时起到了对方案的封装。
 
-将文件放置于与其他launch文件同级路径下，并通过与驱动教程中相同的方式启动节点，仅更改节点名称为humble_start.py。
+将文件放置于与其他launch文件同级路径下，并通过与驱动教程中相同的方式启动节点，仅更改节点名称为humble_start.launch.py。
 
- [humble_start.py](../../launch/humble_start.py)
+ [humble_start.launch.py](../../launch/humble_start.launch.py)
 
 ```Bash
-ros2 launch rslidar_sdk humble_start.py
+ros2 launch rslidar_sdk humble_start.launch.py
 ```
 
 节点启动时会提示用户输入sudo密码,DDS安装只会执行一次，不必担心后续启动节点反复安装.详情参考下方humble_Readme.md。
@@ -17,11 +17,11 @@ ros2 launch rslidar_sdk humble_start.py
 ```LaTeX
 #Readme#
 
-Please put the humble_start.py file under the following directory the same as other start launch files:
+Please put the humble_start.launch.py file under the following directory the same as other start launch files:
 
 /rslidar_sdk/src/rslidar_sdk/launch/
 ├── elequent_start.py
-├── humble_start.py
+├── humble_start.launch.py
 ├── humble_Readme.md
 ├── start.launch
 └── start.py
@@ -29,7 +29,7 @@ Please put the humble_start.py file under the following directory the same as ot
 After finishing the building of rslidar_sdk
 use the following cmd to launch:
 
-$ros2 launch rslidar_sdk humble_start.py$
+$ros2 launch rslidar_sdk humble_start.launch.py$
 
 *****
 This start node is only used for ros2 humble version frame rate drop solution

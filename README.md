@@ -132,13 +132,13 @@ launch 시 인수를 넘겨 config.yaml의 값을 덮어쓸 수 있습니다.
 ## 6 실행
 
 ```sh
-ros2 launch rslidar_sdk humble_start.py
+ros2 launch rslidar_sdk humble_start.launch.py
 ```
 
 파라미터를 변경하여 실행하는 예시:
 
 ```sh
-ros2 launch rslidar_sdk humble_start.py \
+ros2 launch rslidar_sdk humble_start.launch.py \
   device_address:=192.168.1.100 \
   lidar_frame_id:=lidar_link \
   imu_frame_id:=imu_link

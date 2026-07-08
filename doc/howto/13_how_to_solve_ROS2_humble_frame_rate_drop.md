@@ -4,12 +4,12 @@
 
 This method implants the DDS installation and environment variable configuration into the startup node of the rslidar_sdk, and it only takes effect when the node is running, does not affect the global environment, is relatively friendly to environments with multiple ros versions installed, and at the same time serves to encapsulate the solution.
 
-Place the file in the same path as other launch files and start the node in the same way as in the driver tutorial, only changing the node name to humble_start.py.
+Place the file in the same path as other launch files and start the node in the same way as in the driver tutorial, only changing the node name to humble_start.launch.py.
 
-[humble_start.py](../../launch/humble_start.py)
+[humble_start.launch.py](../../launch/humble_start.launch.py)
 
 ```
-ros2 launch rslidar_sdk humble_start.py
+ros2 launch rslidar_sdk humble_start.launch.py
 ```
 
 When the node starts up, it will prompt the user to enter the sudo password. The DDS installation will only be executed once, so there is no need to worry about repeated installations when starting the node later. For details, please refer to humble_Readme.md below.
@@ -17,11 +17,11 @@ When the node starts up, it will prompt the user to enter the sudo password. The
 ```
 #Readme#
 
-Please put the humble_start.py file under the following directory the same as other start launch files:
+Please put the humble_start.launch.py file under the following directory the same as other start launch files:
 
 /rslidar_sdk/src/rslidar_sdk/launch/
 ├── elequent_start.py
-├── humble_start.py
+├── humble_start.launch.py
 ├── humble_Readme.md
 ├── start.launch
 └── start.py
@@ -29,7 +29,7 @@ Please put the humble_start.py file under the following directory the same as ot
 After finishing the building of rslidar_sdk
 use the following cmd to launch:
 
-$ros2 launch rslidar_sdk humble_start.py$
+$ros2 launch rslidar_sdk humble_start.launch.py$
 
 *****
 This start node is only used for ros2 humble version frame rate drop solution
