@@ -1,7 +1,7 @@
-[submodule "src/rslidar_sdk/src/rs_driver"]
-	path = src/rslidar_sdk/src/rs_driver
+[submodule "thirdparty/rs_driver"]
+	path = thirdparty/rs_driver
 	url = https://github.com/zeroworks-robotics/rs_driver.git
 
-[submodule "src/rslidar_msg"]
-	path = src/rslidar_msg
+[submodule "thirdparty/rslidar_msg"]
+	path = thirdparty/rslidar_msg
 	url = https://github.com/zeroworks-robotics/rslidar_msg.git

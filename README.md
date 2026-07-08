@@ -1,6 +1,6 @@
-# rslidar_sdk ROS2 Workspace
+# rslidar_sdk
 
-RoboSense RS-LiDAR-AIRY 전용 ROS2 워크스페이스입니다.  
+RoboSense RS-LiDAR-AIRY 전용 ROS2 패키지입니다.  
 공식 [rslidar_sdk](https://github.com/RoboSense-LiDAR/rslidar_sdk) 기반에 아래 기능을 추가했습니다.
 
 - LiDAR ↔ IMU extrinsic 보정값을 DIFOP 패킷에서 읽어 `/tf_static`으로 publish
@@ -10,11 +10,15 @@ RoboSense RS-LiDAR-AIRY 전용 ROS2 워크스페이스입니다.
 
 ## 1 패키지 구성
 
+이 저장소 자체가 하나의 ROS2 패키지(`rslidar_sdk`)이며, ROS2 워크스페이스의 `src/` 아래에 클론해 사용합니다.
+
 ```
-src/
-├── rslidar_sdk/          # LiDAR SDK 패키지
-│   └── src/rs_driver/   # 드라이버 코어 (submodule: zeroworks-robotics/rs_driver)
-└── rslidar_msg/          # 메시지 정의 패키지 (submodule: zeroworks-robotics/rslidar_msg)
+rslidar_sdk/              # 이 저장소 = LiDAR SDK 패키지
+├── src/                  # 패키지 소스 (manager / msg / source / utility)
+├── config/ node/ launch/ lib/ rviz/ doc/
+└── thirdparty/
+    ├── rs_driver/        # 드라이버 코어 (submodule: zeroworks-robotics/rs_driver)
+    └── rslidar_msg/      # 메시지 정의 패키지 (submodule: zeroworks-robotics/rslidar_msg)
 ```
 
 ---
@@ -49,7 +53,7 @@ sudo apt-get install -y \
 ### 2.4 LiDAR 제어 드라이버 (선택)
 
 `rslidar_ctrl_node`(전원/재부팅 서비스)를 빌드하려면 RoboSense 제공 바이너리 라이브러리가 필요합니다.  
-아래 파일을 `src/rslidar_sdk/lib/rs_ctrl_driver/`에 배치하세요.
+아래 파일을 `lib/rs_ctrl_driver/`에 배치하세요.
 
 | 파일 | 설명 |
 |------|------|
@@ -63,9 +67,10 @@ sudo apt-get install -y \
 
 ## 3 다운로드
 
-서브모듈까지 한 번에 클론합니다.
+워크스페이스의 `src/` 아래에 서브모듈까지 한 번에 클론합니다.
 
 ```sh
+mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
 git clone --recursive <이_저장소_URL>
 ```
 
@@ -75,12 +80,15 @@ git clone --recursive <이_저장소_URL>
 git submodule update --init --recursive
 ```
 
+> `rslidar_msg` 메시지는 `thirdparty/rslidar_msg` 서브모듈을 CMake `add_subdirectory`로
+> **인라인 빌드**합니다. 별도 colcon 패키지나 심볼릭 링크 없이 아래 빌드만 하면 됩니다.
+
 ---
 
 ## 4 빌드
 
 ```sh
-cd <워크스페이스_루트>
+cd ~/ros2_ws
 colcon build --symlink-install
 source install/setup.bash
 ```
@@ -93,7 +101,7 @@ source install/setup.bash
 
 ### 5.1 config.yaml
 
-`src/rslidar_sdk/config/config.yaml`에서 기본값을 수정합니다.
+`config/config.yaml`에서 기본값을 수정합니다.
 
 주요 항목:
 
@@ -170,7 +178,7 @@ ros2 service call /rslidar_sdk/rslidar/set_power std_srvs/srv/SetBool "{data: tr
 
 ## 8 상위 문서 (rslidar_sdk)
 
-- [파라미터 소개](src/rslidar_sdk/doc/intro/02_parameter_intro.md)
-- [온라인 LiDAR 연결 및 포인트 클라우드 수신](src/rslidar_sdk/doc/howto/06_how_to_decode_online_lidar.md)
-- [PCAP 파일 디코딩](src/rslidar_sdk/doc/howto/08_how_to_decode_pcap_file.md)
-- [ROS2 Humble 프레임 드롭 해결](src/rslidar_sdk/doc/howto/13_how_to_solve_ROS2_humble_frame_rate_drop.md)
+- [파라미터 소개](doc/intro/02_parameter_intro.md)
+- [온라인 LiDAR 연결 및 포인트 클라우드 수신](doc/howto/06_how_to_decode_online_lidar.md)
+- [PCAP 파일 디코딩](doc/howto/08_how_to_decode_pcap_file.md)
+- [ROS2 Humble 프레임 드롭 해결](doc/howto/13_how_to_solve_ROS2_humble_frame_rate_drop.md)

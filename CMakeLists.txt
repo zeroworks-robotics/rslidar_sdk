@@ -140,12 +140,17 @@ if(rclcpp_FOUND)
 
   find_package(ament_cmake REQUIRED)
   find_package(sensor_msgs REQUIRED)
-  find_package(rslidar_msg REQUIRED)
   find_package(std_msgs REQUIRED)
   find_package(geometry_msgs REQUIRED)
   find_package(tf2_ros REQUIRED)
   find_package(std_srvs REQUIRED)
   find_package(ament_index_cpp REQUIRED)
+  find_package(rosidl_default_generators REQUIRED)
+
+  # rslidar_msg 를 별도 colcon 패키지가 아니라 서브모듈로 인라인 빌드한다.
+  # (colcon 은 패키지 하위 디렉터리를 스캔하지 않으므로 thirdparty/ 중첩 상태에서
+  #  find_package(rslidar_msg) 는 실패한다. add_subdirectory 로 직접 생성한다.)
+  add_subdirectory(thirdparty/rslidar_msg)
 
 else(rclcpp_FOUND)
   message(=============================================================)
@@ -160,7 +165,7 @@ find_package(yaml-cpp REQUIRED)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 #Driver core#
-add_subdirectory(src/rs_driver)
+add_subdirectory(thirdparty/rs_driver)
 find_package(rs_driver REQUIRED)
 include_directories(${rs_driver_INCLUDE_DIRS})
 
@@ -196,9 +201,13 @@ if(rclcpp_FOUND)
     rclcpp
     std_msgs
     sensor_msgs
-    rslidar_msg
     geometry_msgs
     tf2_ros)
+
+  # 인라인 빌드된 rslidar_msg 의 타입서포트 타깃을 링크 (find_package 대체)
+  rosidl_get_typesupport_target(rslidar_msg_typesupport
+    rslidar_msg rosidl_typesupport_cpp)
+  target_link_libraries(rslidar_sdk_node ${rslidar_msg_typesupport})
 
   #========================
   # rslidar_ctrl_node (lib/rs_ctrl_driver 에 파일이 있을 때만 빌드)
