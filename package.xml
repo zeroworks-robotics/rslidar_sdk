@@ -26,6 +26,8 @@
   <depend condition="$ROS_VERSION == 2">tf2_ros</depend>
   <depend condition="$ROS_VERSION == 2">std_srvs</depend>
   <depend condition="$ROS_VERSION == 2">ament_index_cpp</depend>
+  <!-- rslidar_ctrl_node 의 lib/rs_ctrl_driver 소스가 Boost(Asio/System/DateTime) 헤더 사용 -->
+  <depend condition="$ROS_VERSION == 2">boost</depend>
   <depend>yaml-cpp</depend>
 
   <export>

@@ -210,28 +210,32 @@ if(rclcpp_FOUND)
   target_link_libraries(rslidar_sdk_node ${rslidar_msg_typesupport})
 
   #========================
-  # rslidar_ctrl_node (lib/rs_ctrl_driver 에 파일이 있을 때만 빌드)
+  # rslidar_ctrl_node (lib/rs_ctrl_driver 소스가 있을 때만 빌드)
   #========================
   set(CTRL_DRIVER_DIR "${PROJECT_SOURCE_DIR}/lib/rs_ctrl_driver")
 
-  if(EXISTS "${CTRL_DRIVER_DIR}/librs_ctrl_driver.a" AND
-     EXISTS "${CTRL_DRIVER_DIR}/lidar_ctrl_driver.hpp")
+  if(EXISTS "${CTRL_DRIVER_DIR}/src/lidar_ctrl_driver.cpp")
 
     message(=============================================================)
-    message("-- rs_ctrl_driver found. Building rslidar_ctrl_node.")
+    message("-- rs_ctrl_driver sources found. Building rslidar_ctrl_node.")
     message(=============================================================)
+
+    # 아키텍처 종속 정적 라이브러리(x86-64 .a) 대신 소스를 직접 컴파일한다.
+    # 이렇게 하면 Jetson(aarch64) 등 어떤 타깃에서도 네이티브로 빌드된다.
+    # 의존성은 시스템 Boost 헤더(Asio/System/DateTime, 1.69+ 헤더 온리) + pthread.
+    find_package(Boost REQUIRED)
+
+    file(GLOB RS_CTRL_DRIVER_SRCS "${CTRL_DRIVER_DIR}/src/*.cpp")
 
     add_executable(rslidar_ctrl_node
-                   node/rslidar_ctrl_node.cpp)
+                   node/rslidar_ctrl_node.cpp
+                   ${RS_CTRL_DRIVER_SRCS})
 
     target_include_directories(rslidar_ctrl_node PRIVATE
-      ${CTRL_DRIVER_DIR})
+      ${CTRL_DRIVER_DIR}
+      ${Boost_INCLUDE_DIRS})
 
-    # librs_ctrl_driver.a는 non-PIE boost와 함께 컴파일되어 -no-pie 필요
-    target_link_options(rslidar_ctrl_node PRIVATE -no-pie)
     target_link_libraries(rslidar_ctrl_node
-      ${CTRL_DRIVER_DIR}/librs_ctrl_driver.a
-      ${CTRL_DRIVER_DIR}/libboost_system.a
       ${YAML_CPP_LIBRARIES}
       pthread)
 
@@ -244,7 +248,7 @@ if(rclcpp_FOUND)
       DESTINATION lib/${PROJECT_NAME})
 
   else()
-    message(WARNING "rs_ctrl_driver not found in ${CTRL_DRIVER_DIR}. "
+    message(WARNING "rs_ctrl_driver sources not found in ${CTRL_DRIVER_DIR}/src. "
                     "rslidar_ctrl_node will NOT be built. "
                     "See lib/rs_ctrl_driver/README.md for setup instructions.")
   endif()

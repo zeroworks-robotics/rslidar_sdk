@@ -38,8 +38,11 @@ ROS2 Humble 설치: https://docs.ros.org/en/humble/Installation.html
 
 ```sh
 sudo apt-get update
-sudo apt-get install -y libyaml-cpp-dev libpcap-dev
+sudo apt-get install -y libyaml-cpp-dev libpcap-dev \
+  libboost-dev libboost-system-dev libboost-date-time-dev
 ```
+
+> `libboost-*` 는 `rslidar_ctrl_node`(LiDAR 제어)용입니다. [2.4](#24-lidar-제어-드라이버) 참고.
 
 ### 2.3 ROS2 패키지
 
@@ -50,18 +53,17 @@ sudo apt-get install -y \
   ros-humble-std-srvs
 ```
 
-### 2.4 LiDAR 제어 드라이버 (선택)
+### 2.4 LiDAR 제어 드라이버
 
-`rslidar_ctrl_node`(전원/재부팅 서비스)를 빌드하려면 RoboSense 제공 바이너리 라이브러리가 필요합니다.  
-아래 파일을 `lib/rs_ctrl_driver/`에 배치하세요.
+`rslidar_ctrl_node`(전원/재부팅 서비스)의 제어 드라이버는 `lib/rs_ctrl_driver/src/`의
+**소스를 직접 컴파일**합니다. 별도 바이너리 배치가 필요 없습니다.
 
-| 파일 | 설명 |
-|------|------|
-| `librs_ctrl_driver.a` | 제어 드라이버 정적 라이브러리 |
-| `libboost_system.a` | 번들 Boost.System (non-PIE 빌드) |
+- 의존성은 시스템 Boost 헤더뿐입니다 ([2.2](#22-시스템-라이브러리)에서 설치).
+- 이전에는 사전 컴파일된 `librs_ctrl_driver.a` / `libboost_system.a`(x86-64 전용)를
+  링크했으나, Jetson(aarch64) 등에서 아키텍처 불일치로 링크가 실패해 소스 빌드로 전환했습니다.
+- `lib/rs_ctrl_driver/src/`에 소스가 없으면 CMake 경고 후 `rslidar_ctrl_node` 빌드를 건너뜁니다.
 
-헤더 파일(`lidar_ctrl_driver.hpp`, `ctrl_driver_param.hpp`, `types.h`)은 이미 저장소에 포함되어 있습니다.  
-라이브러리 파일이 없으면 CMake 경고를 출력하고 `rslidar_ctrl_node` 빌드를 건너뜁니다.
+자세한 내용은 [`lib/rs_ctrl_driver/README.md`](lib/rs_ctrl_driver/README.md) 참고.
 
 ---
 
