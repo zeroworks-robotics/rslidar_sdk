@@ -253,8 +253,25 @@ if(rclcpp_FOUND)
                     "See lib/rs_ctrl_driver/README.md for setup instructions.")
   endif()
 
+  #========================
+  # rslidar_deskew_node
+  #========================
+  # Motion-compensates /rslidar_points before anything consumes it. Deliberately independent
+  # of rs_driver and of POINT_TYPE: it only needs PointCloud2 + TF, so it builds and runs
+  # against the driver exactly as deployed. See node/rslidar_deskew_node.cpp for why.
+  add_executable(rslidar_deskew_node
+                 node/rslidar_deskew_node.cpp)
+
+  ament_target_dependencies(rslidar_deskew_node
+    rclcpp
+    sensor_msgs
+    geometry_msgs
+    tf2
+    tf2_ros)
+
   install(TARGETS
     rslidar_sdk_node
+    rslidar_deskew_node
     DESTINATION lib/${PROJECT_NAME})
 
   install(DIRECTORY

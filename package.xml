@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.1"?>
 <package format="3">
   <name>rslidar_sdk</name>
   <version>1.5.21</version>
@@ -24,6 +24,7 @@
   <depend>std_msgs</depend>
   <depend condition="$ROS_VERSION == 2">geometry_msgs</depend>
   <depend condition="$ROS_VERSION == 2">tf2_ros</depend>
+  <depend condition="$ROS_VERSION == 2">tf2</depend>
   <depend condition="$ROS_VERSION == 2">std_srvs</depend>
   <depend condition="$ROS_VERSION == 2">ament_index_cpp</depend>
   <!-- rslidar_ctrl_node 의 lib/rs_ctrl_driver 소스가 Boost(Asio/System/DateTime) 헤더 사용 -->
