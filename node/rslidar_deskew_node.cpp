@@ -263,12 +263,26 @@ private:
   void passthrough(const sensor_msgs::msg::PointCloud2::ConstSharedPtr & in, const std::string & why)
   {
     ++passed_;
-    // Throttled, not silent: a costmap quietly built from skewed clouds is the bug this node
-    // exists to remove, so it must be visible when the node is not actually doing its job.
-    RCLCPP_WARN_THROTTLE(
-      get_logger(), *get_clock(), 5000,
-      "TF does not cover the sweep, republishing unchanged (%s <- %s): %s",
-      fixed_frame_.c_str(), in->header.frame_id.c_str(), why.c_str());
+    // Two different situations, and they deserve different volumes.
+    //
+    // Before the first success this is just bring-up: the lidar publishes long before the
+    // localiser exists, so there is no odom->rslidar yet and there is nothing wrong. Warning
+    // every 5 s for the minutes that takes would train everyone to ignore this message.
+    //
+    // After a success, TF was working and stopped, which is a fault -- and it has to be loud,
+    // because the failure mode this node exists to prevent is a costmap quietly built from
+    // skewed clouds.
+    if (deskewed_ == 0) {
+      RCLCPP_INFO_THROTTLE(
+        get_logger(), *get_clock(), 10000,
+        "waiting for %s <- %s before de-skewing; republishing unchanged meanwhile (%s)",
+        fixed_frame_.c_str(), in->header.frame_id.c_str(), why.c_str());
+    } else {
+      RCLCPP_WARN_THROTTLE(
+        get_logger(), *get_clock(), 5000,
+        "TF stopped covering the sweep, republishing unchanged (%s <- %s): %s",
+        fixed_frame_.c_str(), in->header.frame_id.c_str(), why.c_str());
+    }
     pub_->publish(*in);
     report();
   }
