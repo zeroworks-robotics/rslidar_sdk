@@ -116,7 +116,22 @@ source install/setup.bash
 | `lidar[0].ros` | `ros_frame_id` | 포인트 클라우드 frame ID |
 | `lidar[0].ros` | `ros_imu_frame_id` | IMU frame ID (`/tf_static` child frame) |
 
-### 5.2 launch 파라미터
+### 5.2 POINT_TYPE (CMakeLists.txt)
+
+`CMakeLists.txt`의 `POINT_TYPE`은 rs_driver가 포인트 클라우드를 채울 때 사용하는
+포인트 구조체를 컴파일 타임에 선택하는 옵션입니다. 값을 바꾸면 전체를 다시 빌드해야 합니다.
+
+| POINT_TYPE | 필드 | 설명 |
+|------|------|------|
+| `XYZI` | `x, y, z, intensity` | 좌표 + 반사강도만 포함하는 기본형 |
+| `XYZIRT` (기본값) | `XYZI` + `ring, timestamp` | 레이저 채널 번호(`ring`)와 포인트별 타임스탬프(`timestamp`) 추가 |
+| `XYZIF` | `XYZI` + `feature` | 포인트 특성 플래그(`feature`, 예: 엣지/평면) 추가 |
+| `XYZIRTF` | `XYZIRT` + `feature` | `ring`, `timestamp`, `feature` 모두 포함 |
+
+이 프로젝트는 `rslidar_deskew_node`의 모션 보정(디스큐잉)에 포인트별 `timestamp`가 필요하므로
+`XYZIRT`를 사용합니다. `XYZI`로 바꾸면 해당 필드가 없어 디스큐잉이 동작하지 않습니다.
+
+### 5.3 launch 파라미터
 
 launch 시 인수를 넘겨 config.yaml의 값을 덮어쓸 수 있습니다.
 
